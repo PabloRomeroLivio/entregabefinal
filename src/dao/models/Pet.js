@@ -1,28 +1,38 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const collection = 'Pets';
+const collection = "Pets";
 
-const schema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:true,
+const schema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    specie:{
-        type:String,
-        required:true
+    specie: {
+      type: String,
+      required: true,
     },
-    birthDate:Date,
-    adopted:{
-        type:Boolean,
-        default:false
+    birthDate: {
+      type: Date,
     },
-    owner:{
-        type:mongoose.SchemaTypes.ObjectId,
-        ref:'Users'
+    adopted: {
+      type: Boolean,
+      default: false,
     },
-    image:String
-})
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+    },
+    image: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const petModel = mongoose.model(collection,schema);
+const petModel = mongoose.model(collection, schema);
 
 export default petModel;

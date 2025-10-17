@@ -1,26 +1,25 @@
-
 export default class GenericRepository {
-    constructor(dao) {
-        this.dao = dao;
-    }
+  constructor(dao) {
+    this.dao = dao;
+  }
 
-    getAll = (params) =>{
-        return this.dao.get(params);
-    }
+  async getAll(params) {
+    return await this.dao.get(params);
+  }
 
-    getBy = (params) =>{
-        return this.dao.getBy(params);
-    }
+  async getBy(params) {
+    return await this.dao.getBy(params);
+  }
 
-    create = (doc) =>{
-        return this.dao.save(doc);
-    }
+  async create(doc) {
+    return await this.dao.save(doc);
+  }
 
-    update = (id,doc) =>{
-        return this.dao.update(id,doc);
-    }
+  async update(id, doc) {
+    return await this.dao.update(id, doc);
+  }
 
-    delete = (id) =>{
-        return this.dao.delete(id);
-    }
+  async delete(id) {
+    return await this.dao.delete(id);
+  }
 }

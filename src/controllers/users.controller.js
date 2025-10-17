@@ -1,35 +1,78 @@
-import { usersService } from "../services/index.js"
+import { usersService, petsService, adoptionsService } from "../services/index.js";
 
-const getAllUsers = async(req,res)=>{
-    const users = await usersService.getAll();
-    res.send({status:"success",payload:users})
-}
 
-const getUser = async(req,res)=> {
-    const userId = req.params.uid;
-    const user = await usersService.getUserById(userId);
-    if(!user) return res.status(404).send({status:"error",error:"User not found"})
-    res.send({status:"success",payload:user})
-}
+const getAllAdoptions = async (req, res) => {
+  try {
+    const adoptions = await adoptionsService.getAll();
+    res.send({ status: "success", payload: adoptions });
+  } catch (error) {
+    console.error("❌ Error fetching adoptions:", error);
+    res.status(500).send({ status: "error", error: "Internal server error" });
+  }
+};
 
-const updateUser =async(req,res)=>{
-    const updateBody = req.body;
-    const userId = req.params.uid;
-    const user = await usersService.getUserById(userId);
-    if(!user) return res.status(404).send({status:"error", error:"User not found"})
-    const result = await usersService.update(userId,updateBody);
-    res.send({status:"success",message:"User updated"})
-}
 
-const deleteUser = async(req,res) =>{
-    const userId = req.params.uid;
-    const result = await usersService.getUserById(userId);
-    res.send({status:"success",message:"User deleted"})
-}
+const getAdoption = async (req, res) => {
+  try {
+    const { aid } = req.params;
+    const adoption = await adoptionsService.getById(aid);
+    if (!adoption) return res.status(404).send({ status: "error", error: "Adoption not found" });
+    res.send({ status: "success", payload: adoption });
+  } catch (error) {
+    console.error("❌ Error fetching adoption:", error);
+    res.status(500).send({ status: "error", error: "Internal server error" });
+  }
+};
+
+
+const createAdoption = async (req, res) => {
+  try {
+    const { uid, pid } = req.params;
+
+
+    const user = await usersService.getUserById(uid);
+    if (!user) return res.status(404).send({ status: "error", error: "User not found" });
+
+    const pet = await petsService.getPetById(pid);
+    if (!pet) return res.status(404).send({ status: "error", error: "Pet not found" });
+
+
+    const adoption = await adoptionsService.create({
+      user: uid,
+      pet: pid,
+      date: new Date(),
+    });
+
+
+    await petsService.update(pid, { adopted: true, owner: uid });
+
+    res.status(201).send({ status: "success", payload: adoption });
+  } catch (error) {
+    console.error("❌ Error creating adoption:", error);
+    res.status(500).send({ status: "error", error: "Internal server error" });
+  }
+};
+
+const deleteAdoption = async (req, res) => {
+  try {
+    const { aid } = req.params;
+    const adoption = await adoptionsService.getById(aid);
+    if (!adoption) return res.status(404).send({ status: "error", error: "Adoption not found" });
+
+
+    await petsService.update(adoption.pet, { adopted: false, owner: null });
+
+    await adoptionsService.delete(aid);
+    res.send({ status: "success", message: "Adoption deleted" });
+  } catch (error) {
+    console.error("❌ Error deleting adoption:", error);
+    res.status(500).send({ status: "error", error: "Internal server error" });
+  }
+};
 
 export default {
-    deleteUser,
-    getAllUsers,
-    getUser,
-    updateUser
-}
+  getAllAdoptions,
+  getAdoption,
+  createAdoption,
+  deleteAdoption,
+};
