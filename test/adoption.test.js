@@ -16,57 +16,59 @@ describe('🧪 Tests funcionales - Adoptions API', function () {
   let testAdoption;
 
 
-  it('POST /api/users debe crear un usuario', async () => {
-    const res = await request.post('/api/users').send({
-      first_name: 'Test',
+  before(async () => {
+    const userRes = await request.post('/api/users').send({
+      first_name: 'AdoptTest',
       last_name: 'User',
-      email: `test${Date.now()}@mail.com`,
+      email: `adopt${Date.now()}@example.com`,
       password: '123456'
     });
+    testUser = userRes.body.payload;
 
-    expect(res.statusCode).to.be.oneOf([200, 201]);
-    expect(res.body.payload).to.have.property('_id');
-    testUser = res.body.payload;
-  });
-
-
-  it('POST /api/pets debe crear una mascota', async () => {
-    const res = await request.post('/api/pets').send({
+    const petRes = await request.post('/api/pets').send({
       name: 'Buddy',
       specie: 'dog',
-      birthDate: '2021-01-01',
-      adopted: false
+      birthDate: '2022-01-01'
     });
-
-    expect(res.statusCode).to.be.oneOf([200, 201]);
-    expect(res.body.payload).to.have.property('_id');
-    testPet = res.body.payload;
+    testPet = petRes.body.payload;
   });
 
 
   it('POST /api/adoptions/:uid/:pid debe crear una adopción', async () => {
     const res = await request.post(`/api/adoptions/${testUser._id}/${testPet._id}`);
-    expect(res.statusCode).to.be.oneOf([200, 201]);
-    expect(res.body.payload).to.have.property('_id');
+    expect(res.statusCode).to.equal(201);
+    expect(res.body.payload).to.have.property('user', testUser._id);
+    expect(res.body.payload).to.have.property('pet', testPet._id);
     testAdoption = res.body.payload;
   });
+
 
   it('GET /api/adoptions debe devolver todas las adopciones', async () => {
     const res = await request.get('/api/adoptions');
     expect(res.statusCode).to.equal(200);
     expect(res.body.payload).to.be.an('array');
+    const found = res.body.payload.find(a => a._id === testAdoption._id);
+    expect(found).to.exist;
   });
 
 
-  it('GET /api/adoptions/:aid debe devolver la adopción creada', async () => {
+  it('GET /api/adoptions/:aid debe devolver una adopción específica', async () => {
     const res = await request.get(`/api/adoptions/${testAdoption._id}`);
     expect(res.statusCode).to.equal(200);
     expect(res.body.payload).to.have.property('_id', testAdoption._id);
   });
 
 
-  it('GET /api/adoptions/:aid con ID inválido debe retornar 404 o 400', async () => {
-    const res = await request.get('/api/adoptions/670cb8e86df9a1f4e6a8f111');
+  it('DELETE /api/adoptions/:aid debe eliminar la adopción', async () => {
+    const res = await request.delete(`/api/adoptions/${testAdoption._id}`);
+    expect(res.statusCode).to.equal(200);
+    expect(res.body).to.have.property('status', 'success');
+  });
+
+
+  it('GET /api/adoptions/:aid con ID inválido debe retornar 404', async () => {
+    const fakeId = '670cb8e86df9a1f4e6a8f111';
+    const res = await request.get(`/api/adoptions/${fakeId}`);
     expect(res.statusCode).to.be.oneOf([400, 404]);
   });
 });

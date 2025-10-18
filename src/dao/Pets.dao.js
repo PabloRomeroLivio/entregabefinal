@@ -1,23 +1,33 @@
 import petModel from "./models/Pet.js";
 
 export default class PetsDao {
-  get = (params) => {
-    return petModel.find(params);
+  getAll = async (params = {}) => {
+    const pets = await petModel.find(params).lean();
+    return Array.isArray(pets) ? pets : [];
   };
 
-  getBy = (params) => {
-    return petModel.findOne(params);
+  get = async (params = {}) => {
+    const pets = await petModel.find(params).lean();
+    return Array.isArray(pets) ? pets : [];
   };
 
-  save = (doc) => {
-    return petModel.create(doc);
+  getBy = async (params) => {
+    const pet = await petModel.findOne(params).lean();
+    return pet || null;
   };
 
-  update = (id, doc) => {
-    return petModel.findByIdAndUpdate(id, { $set: doc }, { new: true });
+  save = async (doc) => {
+    const pet = await petModel.create(doc);
+    return pet.toObject ? pet.toObject() : pet;
   };
 
-  delete = (id) => {
-    return petModel.findByIdAndDelete(id);
+  update = async (id, doc) => {
+    const updated = await petModel.findByIdAndUpdate(id, { $set: doc }, { new: true }).lean();
+    return updated || null;
+  };
+
+  delete = async (id) => {
+    const deleted = await petModel.findByIdAndDelete(id).lean();
+    return deleted || null;
   };
 }

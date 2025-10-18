@@ -64,6 +64,9 @@ src/
 └── adoptions.test.js
 
 
+La documentación de la API está disponible en:
+
+http://localhost:8081/api/docs
 
 
 
@@ -81,6 +84,26 @@ src/
 
 ---
 
+🐳 Docker
+Dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+EXPOSE 8080
+CMD ["node", "src/app.js"]
+
+Construir imagen
+docker build -t pabloromerolivio/proyecto-adoptme:latest .
+
+Ejecutar contenedor
+docker run -p 8081:8081 pabloromerolivio/proyecto-adoptme:latest
+
+LINK PUBLICO
+https://hub.docker.com/r/pabloromerolivio/proyecto-adoptme
+
+
 ## 📦 Instalación
 
 1. Clonar el repositorio:
@@ -95,7 +118,7 @@ npm install
 
 #Crear un archivo .env en la raíz con las siguientes variables:
 
-PORT=8080
+PORT=8081
 MONGO_URL=mongodb+srv://pabloromerolivio:pabloromerolivio@cluster0.gj7u9pb.mongodb.net/
 
 
